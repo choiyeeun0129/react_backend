@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+	<mapper namespace="kr.co.seoulit.account.sys.base.mapper.MenuMapper">
+
+		<resultMap id="menuResult" type="kr.co.seoulit.account.sys.base.to.MenuBean">
+			<result property="menuCode" column="MENU_CODE"/>
+			<result property="menuName" column="MENU_NAME"/>
+			<result property="parentMenuCode" column="PARENT_MENU_CODE"/>
+			<result property="url" column="URL"/>
+			<result property="positionCode" column="WORKPLACE_CODE"/>
+		</resultMap>
+		
+		
+		<!-- selectMenuList -->
+		<select id="selectMenuList" parameterType="String" resultMap="menuResult">
+			<![CDATA[
+				select 
+					  m.MENU_CODE as menuCode
+					, m.MENU_NAME as menuName
+					, m.PARENT_MENU_CODE as parentMenuCode
+					, m.URL as url
+					, e.POSITION_CODE  as positionCode
+            	FROM  MENU m
+            		, EMPLOYEE e
+            		, MENU_AVAILABLE_BY_POSITION mv
+           		WHERE    e.DEPT_CODE = mv.DEPT_CODE
+            	AND      e.POSITION_CODE = mv.POSITION_CODE
+                AND      mv.MENU_CODE = m.MENU_CODE
+                AND      e.EMP_CODE = #{deptCode}
+                ORDER BY m.MENU_CODE		
+			]]>	
+		</select>
+		
+		
+		<!-- selectAllMenuList -->
+		<select id="selectAllMenuList" resultMap="menuResult">
+			<![CDATA[
+				SELECT   * 
+				FROM     MENU 
+				ORDER BY MENU_CODE
+			]]>
+		</select>
+		
+		<!-- selectMenuNameList 추가 내용 테이블에 없는 컬럼을 호출함..-->
+		<!-- <select id="selectMenuNameList" resultMap="menuResult">
+			<![CDATA[
+				SELECT DISTINCT a.AUTHORITY_NAME 
+				FROM AUTHORITY a,
+            	(SELECT * FROM MENU_USE_POSITION WHERE AUTHORITY = '1' AND DEPT_CODE=#deptCode#) mu
+            	WHERE a.AUTHORITY_CODE = mu.WORKPLACE_CODE
+			]]>
+		</select> -->
+		  <select id="selectMenuNameList" parameterType="java.lang.String" resultType="kr.co.seoulit.account.sys.base.to.MenuBean">
+      <![CDATA[
+			        SELECT AUTHORITY_NAME as menuName FROM
+			(SELECT DISTINCT AUTHORITY_NAME FROM AUTHORITY_MENU AM,
+			(SELECT * 
+			FROM AUTHORITY_GROUP A,MENU_USE_POSITION M 
+			WHERE A.AUTHORITY_GROUP_CODE=M.AUTHORITY_GROUP_CODE
+			AND DEPT_CODE= #{deptCode} 
+			AND AUTHORITY_GROUP=1 AND AUTHORITY=1)WC
+			WHERE AM.AUTHORITY_CODE=WC.WORKPLACE_CODE)
+      ]]>            
+   </select>
+
+</mapper>

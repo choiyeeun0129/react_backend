@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="kr.co.seoulit.account.budget.formulation.mapper.FormulationMapper">
+
+
+	<select id="selectBudget" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean" resultMap="budgetBeanResult">
+		<![CDATA[
+ 			SELECT * 
+ 			FROM BUDGET
+			where DEPT_CODE= #{deptCode}
+			and WORKPLACE_CODE= #{workplaceCode}
+			and ACCOUNT_INNER_CODE= #{accountInnerCode}
+			and BUDGETING_CODE= #{budgetingCode}
+ 		]]>
+    </select>
+    
+    	
+
+	<!-- 외부parameter로 값을 던져주는거 -->
+	<parameterMap id="budgetParams" type="kr.co.seoulit.account.budget.formulation.to.BudgetBean" >
+		<parameter property="deptCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="workplaceCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="accountInnerCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="budgetingCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="m1Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m2Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m3Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m4Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m5Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m6Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m7Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m8Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m9Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m10Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m11Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+		<parameter property="m12Budget" jdbcType="DECIMAL" javaType="int" mode="IN" />
+	</parameterMap>
+
+	<select id="selectBudgetList" parameterMap="budgetParams" statementType="CALLABLE">
+		<![CDATA[
+			{call org_budget(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+		]]>
+	</select>
+
+
+	<!-- 외부parameter로 값을 던져주는거 -->
+	<parameterMap id="budgetStatusParams" type="java.util.HashMap" >   <!--원래 풀네임 오류시, 수정  -->
+		<parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="workplaceCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="deptCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="RESULT" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"  
+				   resultMap="budgetStatusResult" />
+	</parameterMap>
+
+	<resultMap id="budgetStatusBeanResult" type="kr.co.seoulit.account.budget.formulation.to.BudgetStatusBean">
+		<result property="accountInnerCode" column="ACCOUNT_INNER_CODE"  />
+		<result property="accountName" column="ACCOUNT_NAME" />
+		<result property="annualBudgetRecord" column="ABR" />
+		<result property="annualBudget" column="ANNUALBUDGET"  />
+		<result property="remainingBudget" column="REMAINING_BUDGET"  />
+		<result property="budgetExecRatio" column="BUDGET_EXEC_RATE" />
+		<result property="monthBudgetRecord" column="AMBR"/>
+		<result property="monthBudget" column="BUDGET"  />
+		<result property="remainingMonthBudget" column="REMAINING_MONTH_BUDGET" />
+		<result property="monthBudgetExecRatio" column="MONTH_BUDGET_EXEC_RATE"  />
+	</resultMap>
+	
+	<resultMap id="budgetBeanResult" type="kr.co.seoulit.account.budget.formulation.to.BudgetBean">
+		<result property="deptCode" column="DEPT_CODE"  />
+		<result property="workplaceCode" column="WORKPLACE_CODE"  />
+		<result property="accountInnerCode" column="ACCOUNT_INNER_CODE"  />
+		<result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO"  />
+		<result property="budgetingCode" column="BUDGETING_CODE"  />
+		<result property="m1Budget" column="M1_BUDGET"  />
+		<result property="m2Budget" column="M2_BUDGET" />
+		<result property="m3Budget" column="M3_BUDGET"  />
+		<result property="m4Budget" column="M4_BUDGET"  />
+		<result property="m5Budget" column="M5_BUDGET" />
+		<result property="m6Budget" column="M6_BUDGET"  />
+		<result property="m7Budget" column="M7_BUDGET"  />
+		<result property="m8Budget" column="M8_BUDGET"  />
+		<result property="m9Budget" column="M9_BUDGET"  />
+		<result property="m10Budget" column="M10_BUDGET"  />
+		<result property="m11Budget" column="M11_BUDGET"  />
+		<result property="m12Budget" column="M12_BUDGET" />
+	</resultMap>
+
+	<select id="selectBudgetStatus" parameterMap="budgetStatusParams" statementType="CALLABLE">
+		<![CDATA[
+			{call BUDGET_STATUS(?,?,?,?)}
+		]]>
+	</select>
+
+
+	<select id="selectBudgetAppl" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean" resultMap="budgetBeanResult">
+		<![CDATA[
+ 			SELECT 
+ 			M1_BUDGET as m1Budget,
+ 			M2_BUDGET as m2Budget,
+ 			M3_BUDGET as m3Budget,
+ 			M4_BUDGET as m4Budget,
+ 			M5_BUDGET as m5Budget,
+ 			M6_BUDGET as m6Budget,
+ 			M7_BUDGET as m7Budget,
+ 			M8_BUDGET as m8Budget,
+ 			M9_BUDGET as m9Budget,
+ 			M10_BUDGET as m10Budget,
+ 			M11_BUDGET as m11Budget,
+ 			M12_BUDGET as m12Budget
+ 
+ 			 FROM BUDGET
+			where DEPT_CODE= #{deptCode}
+			and WORKPLACE_CODE= #{workplaceCode}
+			and ACCOUNT_INNER_CODE= #{accountInnerCode}
+			and ACCOUNT_PERIOD_NO= #{accountPeriodNo}
+			and BUDGETING_CODE= #{budgetingCode}
+ 		]]>
+    </select>
+
+</mapper>

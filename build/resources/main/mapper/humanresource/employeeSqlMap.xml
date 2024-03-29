@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.account.operate.humanresource.mapper.EmployeeMapper">
+
+
+
+<select id="selectEmployee" parameterType="String" resultType="kr.co.seoulit.account.operate.humanresource.to.EmployeeBean">
+		<![CDATA[
+    			SELECT
+					EMP_CODE                as empCode,
+					EMP_NAME                as empName,
+					USER_PW                 as userPw,
+					POSITION_CODE           as positionCode,
+					POSITION_NAME           as positionName,
+					DEPT_CODE               as deptCode,
+					EMAIL                   as eMail,
+					GENDER                  as gender,
+					SOCIAL_SECURITY_NUMBER  as socialSecurityNumber,
+					PHONE_NUMBER            as phoneNumber,
+					COMPANY_CODE            as companyCode,
+					BIRTH_DATE              as birthDate,
+					ZIP_CODE                as ZipCode,
+					BASIC_ADDRESS           as basicAddress,
+					DETAIL_ADDRESS          as detailAddress,
+					IMAGE					as image
+				FROM EMPLOYEE WHERE EMP_CODE = #{empCode}
+		]]>
+	</select>
+	<select id="selectEmployeeList" parameterType="String" resultType="kr.co.seoulit.account.operate.humanresource.to.EmployeeBean">
+		<![CDATA[
+			SELECT * FROM EMPLOYEE where DEPT_CODE = #{deptCode}
+		]]>
+	</select>
+	
+	<select id="selectEmployeeListAll" resultType="kr.co.seoulit.account.operate.humanresource.to.EmployeeBean">
+		<![CDATA[
+			SELECT 
+			EMP_CODE   as empCode, 
+			EMP_NAME   as empName,
+			DEPT_CODE  as deptCode
+			FROM EMPLOYEE
+		]]>
+	</select>
+		<update id="updateEmployeeInfo" parameterType="kr.co.seoulit.account.operate.humanresource.to.EmployeeBean">
+			UPDATE EMPLOYEE SET
+            USER_PW = #{userPw}, EMP_NAME = #{empName},
+            POSITION_CODE = #{positionCode}, DEPT_CODE = #{deptCode}, DEPT_NAME = #{deptName},
+            PHONE_NUMBER = #{phoneNumber}, ZIP_CODE = #{zipCode}, BASIC_ADDRESS = #{basicAddress},
+            DETAIL_ADDRESS = #{detailAddress}, EMAIL = #{eMail}, IMAGE = #{image},
+            SOCIAL_SECURITY_NUMBER = #{socialSecurityNumber}
+            WHERE EMP_CODE = #{empCode}
+    	</update>
+	    <update id="updateEmployee" parameterType="kr.co.seoulit.account.operate.humanresource.to.EmployeeBean">
+			UPDATE EMPLOYEE SET DEPT_CODE=#{deptCode}, POSITION_CODE= #{positionCode}
+	        WHERE EMP_CODE= #{empCode}
+	    </update>
+
+
+	<!-- deleteEmployee -->
+	<delete id="deleteEmployee" parameterType="String">
+    		DELETE FROM EMPLOYEE
+			WHERE  EMP_CODE=#{empCode}
+    </delete>
+    	<insert id="insertEmployee" parameterType="kr.co.seoulit.account.operate.humanresource.to.EmployeeBean">
+    		INSERT INTO EMPLOYEE
+				(
+				  EMP_CODE
+				, USER_PW
+				, EMP_NAME
+				, DEPT_CODE
+				, GENDER,SOCIAL_SECURITY_NUMBER
+				, PHONE_NUMBER
+				, EMAIL
+				, BIRTH_DATE
+				, ZIP_CODE
+				, BASIC_ADDRESS
+				, DETAIL_ADDRESS
+				)
+			VALUES(
+				  #{empCode}
+				, #{userPw}
+				, #{empName}
+				, #{deptCode}
+				, #{gender}
+				, #{socialSecurityNumber}
+				, #{phoneNumber}
+				, #{eMail}
+				, #{birthDate}
+				, #{zipCode}
+				, #{BasicAddress}
+				, #{detailAddress}
+				)
+    	</insert>
+
+		<update id="updateImage" parameterType="String">
+			UPDATE EMPLOYEE SET IMAGE=#{newFileName} WHERE EMP_CODE='admin'
+		</update>
+		
+		<select id="selectImage" parameterType="String" resultType="kr.co.seoulit.account.posting.business.to.SlipBean">
+			SELECT IMAGE FROM EMPLOYEE WHERE EMP_CODE = #{EMP_CODE}
+		</select>
+</mapper>

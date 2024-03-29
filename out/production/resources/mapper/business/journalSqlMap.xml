@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.account.posting.business.mapper.JournalMapper">
+
+
+    <select id="selectRangedJournalList" parameterType="java.util.HashMap" resultType="kr.co.seoulit.account.posting.business.to.JournalBean">
+		<![CDATA[
+        SELECT J.JOURNAL_NO          as journalNo,
+               J.SLIP_NO             as slipNo,
+               J.BALANCE_DIVISION    as balanceDivision,
+               J.ACCOUNT_INNER_CODE  as accountCode,
+               A.ACCOUNT_NAME        as accountName,
+               J.CUSTOMER_CODE       as customerCode,
+               J.LEFT_DEBTOR_PRICE   as leftDebtorPrice,
+               J.RIGHT_CREDITS_PRICE as rightCreditsPrice
+              
+        FROM SLIP S,
+             JOURNAL J,
+             ACCOUNT A
+        WHERE J.SLIP_NO = S.SLIP_NO
+          AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+          AND S.REPORTING_DATE BETWEEN #{fromDate} AND #{toDate} 
+          AND S.SLIP_STATUS = '승인완료'
+       ORDER BY S.REPORTING_DATE, S.SLIP_NO, J.JOURNAL_NO
+        ]]>
+    </select>
+    <select id="selectJournalList" parameterType="String" resultType="kr.co.seoulit.account.posting.business.to.JournalBean">
+			<![CDATA[
+				SELECT J.JOURNAL_NO          as journalNo,
+               		   J.SLIP_NO             as slipNo,
+               		   J.BALANCE_DIVISION    as balanceDivision,
+               		   J.ACCOUNT_INNER_CODE  as accountCode,
+               		   J.CUSTOMER_CODE       as customerCode,
+               		   J.LEFT_DEBTOR_PRICE   as leftDebtorPrice,
+               		   J.RIGHT_CREDITS_PRICE as rightCreditsPrice,
+               		   A.ACCOUNT_NAME        as accountName
+				  FROM JOURNAL J, 
+					   ACCOUNT A 
+				 WHERE J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE 
+				   AND J.SLIP_NO = #{slipNo}
+			 ]]>
+	</select>
+	<insert id="insertJournal" parameterType="kr.co.seoulit.account.posting.business.to.JournalBean">
+			<![CDATA[
+				INSERT INTO JOURNAL
+					(
+					JOURNAL_NO, 
+					SLIP_NO, 
+					BALANCE_DIVISION, 
+					ACCOUNT_INNER_CODE, 
+					CUSTOMER_CODE, 
+					RIGHT_CREDITS_PRICE, 
+					LEFT_DEBTOR_PRICE
+				)VALUES(
+					#{journalNo},
+					#{slipNo},
+					#{balanceDivision},
+					#{accountCode},
+					#{customerCode},
+					#{rightCreditsPrice},
+					#{leftDebtorPrice}
+					)
+			]]>
+	</insert>
+	<select id="selectJournalName" parameterType="String" resultType="String">
+			<![CDATA[
+				SELECT #{slipNo} || 'JOURNAL' || NVL(SUBSTR(MAX(JOURNAL_NO), INSTR(MAX(JOURNAL_NO), 'JOURNAL') + 7) + 1, 0)
+                FROM  JOURNAL
+                WHERE SLIP_NO = #{slipNo}
+			]]>
+	</select>
+	<delete id="deleteJournal" parameterType="String">
+			<![CDATA[
+				DELETE FROM JOURNAL WHERE JOURNAL_NO=#{journalNo}
+			 ]]>
+	</delete>
+	<delete id="deleteJournalAll" parameterType="String">
+			<![CDATA[
+				DELETE FROM JOURNAL WHERE SLIP_NO=#{journalBean}
+			 ]]>
+	</delete>
+	<update id="updateJournal" parameterType="kr.co.seoulit.account.posting.business.to.JournalBean">
+			<![CDATA[
+				UPDATE  JOURNAL SET 
+						BALANCE_DIVISION=#{balanceDivision}, 
+						ACCOUNT_INNER_CODE=#{accountCode},
+						CUSTOMER_CODE=#{customerCode},
+						RIGHT_CREDITS_PRICE=#{rightCreditsPrice}, 
+						LEFT_DEBTOR_PRICE=#{leftDebtorPrice} 
+				WHERE 	SLIP_NO =#{slipNo}
+				AND 	JOURNAL_NO =#{journalNo}
+			
+			 ]]>
+	</update>
+	
+	
+	
+	
+	<select id="selectJournalDetailList" parameterType="String" resultType="kr.co.seoulit.account.posting.business.to.JournalDetailBean">
+		<![CDATA[
+		select 
+            		J.JOURNAL_NO as journalNo, 
+            		J.JOURNAL_DETAIL_NO as journalDetailNo, 
+            		J.DESCRIPTION AS journalDescription, 
+            		A.ACCOUNT_CONTROL_TYPE as accountControlType, 
+            		A.ACCOUNT_CONTROL_NAME as accountControlName, 
+            		A.ACCOUNT_CONTROL_CODE as accountControlCode, 
+            		A.DESCRIPTION AS accountControlDescription
+            		from journal_detail J, 
+            		account_control_detail A 
+            		where 
+            		J.account_control_code=A.account_control_code 
+            		and J.journal_no= #{journalNo}
+		
+		 ]]>
+		 </select>
+		 <select id="selectJournalDetailDescriptionName" parameterType="String" resultType="kr.co.seoulit.account.posting.business.to.JournalDetailBean">
+		<![CDATA[
+						SELECT C.DETAIL_CODE_NAME
+            		    FROM JOURNAL_DETAIL J, CODE_DETAIL C 
+            			WHERE J.DESCRIPTION = C.DETAIL_CODE 
+            				AND J.JOURNAL_DETAIL_NO = #{journalDetailNo}
+		
+		 ]]>
+		 </select>
+		 <!--던지는건 list인데 받는건 string?  -->
+		 <delete id="deleteJournalDetail" parameterType="String">
+			<![CDATA[
+ 			DELETE FROM JOURNAL_DETAIL WHERE JOURNAL_NO = #{journalNo}
+ 		]]>
+			
+		 </delete>
+		 <delete id="deleteJournalDetailByJournalNo" parameterType="String" >
+		<![CDATA[
+			DELETE FROM JOURNAL_DETAIL WHERE JOURNAL_NO = #{journalNo}
+		 ]]>
+		 </delete>
+		 
+		 <update id="updateJournalDetail" parameterType="kr.co.seoulit.account.posting.business.to.JournalDetailBean" >
+		<![CDATA[
+			UPDATE JOURNAL_DETAIL SET DESCRIPTION = #{journalDescription}
+			WHERE JOURNAL_DETAIL_NO = #{journalDetailNo}
+		
+		 ]]>
+		 </update>
+		 <insert id="insertJournalDetailList" parameterType="kr.co.seoulit.account.posting.business.to.JournalDetailBean">
+		<![CDATA[
+			
+				INSERT INTO JOURNAL_DETAIL(
+	 				JOURNAL_NO,
+					JOURNAL_DETAIL_NO,
+					ACCOUNT_CONTROL_CODE,
+					DESCRIPTION
+				)VALUES(
+					#{journalNo},
+					JOURNAL_DETAIL_NO_SEQUENCE.NEXTVAL,
+					#{accountControlCode},
+					#{journalDescription}
+				)
+ 		]]>
+		 </insert>
+</mapper>

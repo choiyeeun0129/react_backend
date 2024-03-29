@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="LOGS_ABSOLUTE_PATH" value="./logs"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <Pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level [%logger{0}:%line] - %msg%n</Pattern>
+    </layout>
+  </appender>
+
+  <appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+   <smtpHost>smtp.naver.com</smtpHost>
+   <smtpPort>465</smtpPort>
+   <username>rhkddnjs9741</username>  <!-- smtp 설정한 계정 -->
+   <password>1606989abAB_</password>
+   <to>rhkddnjs9741@naver.com</to>  <!-- 받는사람 -->
+   <from>rhkddnjs9741@naver.com</from><!-- 보내는 사람 -->
+   <subject>TESTING: %logger{20} - %m</subject>
+   
+   <layout class="ch.qos.logback.classic.html.HTMLLayout"/>  <!-- 출력포멧 -->
+   
+   <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+   
+   <bufferSize>1</bufferSize>
+   </cyclicBufferTracker>
+   <asynchronousSending>false</asynchronousSending>
+</appender>
+
+  
+  <appender name="INFO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+    <file>./logs/info.log</file>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>INFO</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>./was-logs/info.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>100MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <maxHistory>180</maxHistory>
+    </rollingPolicy>
+  </appender>
+  
+ <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+    <file>./logs/warn.log</file>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>WARN</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>./was-logs/warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>100MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <maxHistory>180</maxHistory>
+    </rollingPolicy>
+  </appender>
+
+    <appender name="SMS" class="kr.co.seoulit.account.sys.common.controller.LogSMSController">
+        <accessKey>KZ3NrzItq8tgEru1fq6E</accessKey> <!-- Access Key : https://www.ncloud.com/mypage/manage/info > 인증키 관리 > Access Key ID -->
+        <secretKey>Z7zN4AJM5Ge6VyVgirr8OIeKot4ykM3pjGbw6yc5</secretKey> <!-- Service Key : https://www.ncloud.com/mypage/manage/info > 인증키 관리 > Access Key ID -->
+        <serviceId>ncp:sms:kr:273349967014:smstest</serviceId> <!-- service ID : https://console.ncloud.com/sens/project > Simple & ... > Project > 서비스 ID -->
+        <to>01050419741</to> <!-- SMS destination phone number -->
+        <from>01050419741</from> <!-- SMS approve phone number -->
+    </appender>
+  
+  <root level="DEBUG">
+      <appender-ref ref="STDOUT" />
+      <appender-ref ref="STDOUT" />
+  </root>
+  <root level="INFO">
+      <appender-ref ref="STDOUT" />
+      <appender-ref ref="EMAIL"/>
+      <appender-ref ref="SMS"/>
+  </root>
+
+  <logger name="LogController" additivity="false">
+    <level value = "DEBUG" />
+    <appender-ref ref="INFO_LOG" />
+    <appender-ref ref="WARN_LOG" />
+  </logger>
+  <logger name="org.hibernate.SQL" additivity="false">
+    <level value = "DEBUG" />
+    <appender-ref ref="INFO_LOG" />
+  </logger>
+</configuration>

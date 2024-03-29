@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.account.posting.business.mapper.SlipMapper">
+
+
+    <select id="selectSlipDataList" parameterType="String"
+            resultType="kr.co.seoulit.account.posting.business.to.SlipBean">
+		<![CDATA[
+        SELECT SLIP_NO              as slipNo,
+               ACCOUNT_PERIOD_NO    as accountPeriodNo,
+               DEPT_CODE            as deptCode,
+               SLIP_TYPE            as slipType,
+               EXPENSE_REPORT       as expenseReport,
+               REPORTING_EMP_CODE   as reportingEmpCode,
+               REPORTING_DATE       as reportingDate,
+               APPROVAL_EMP_CODE    as approvalEmpCode,
+               APPROVAL_DATE        as approvalDate,
+               SLIP_STATUS          as slipStatus
+        FROM SLIP
+        WHERE REPORTING_DATE = #{slipDate}
+        ORDER BY SLIP_NO
+        ]]>
+		
+		 </select>
+
+    <delete id="deleteSlip" parameterType="String">
+			<![CDATA[
+        DELETE
+        FROM SLIP
+        WHERE SLIP_NO = #{slipNo}
+        ]]>
+		 </delete>
+
+    <update id="updateSlip" parameterType="kr.co.seoulit.account.posting.business.to.SlipBean">
+			<![CDATA[
+        UPDATE SLIP
+        SET SLIP_STATUS=#{slipStatus}
+        WHERE SLIP_NO = #{slipNo}
+        ]]>
+		 </update>
+    <insert id="insertSlip" parameterType="kr.co.seoulit.account.posting.business.to.SlipBean">
+			<![CDATA[
+        INSERT INTO SLIP(SLIP_NO,
+                         ACCOUNT_PERIOD_NO,
+                         DEPT_CODE,
+                         SLIP_TYPE,
+                         EXPENSE_REPORT,
+                         REPORTING_EMP_CODE,
+                         REPORTING_DATE,
+                         SLIP_STATUS,
+                         Approval_emp_code,
+                         APPROVAL_DATE)
+        VALUES (#{slipNo},
+                #{accountPeriodNo},
+                #{deptCode},
+                #{slipType},
+                #{expenseReport},
+                #{reportingEmpCode},
+                #{reportingDate},
+                #{slipStatus},
+                #{approvalEmpCode},
+                #{approvalDate})
+        ]]>
+		 </insert>
+    <update id="updateapproveSlip" parameterType="kr.co.seoulit.account.posting.business.to.SlipBean">
+			<![CDATA[
+        UPDATE SLIP
+        SET APPROVAL_DATE=#{approvalDate},
+            SLIP_STATUS=#{slipStatus},
+            APPROVAL_EMP_CODE=#{approvalEmpCode}
+        WHERE SLIP_NO = #{slipNo}
+        ]]>
+		 </update>
+    <select id="selectRangedSlipList" parameterType="java.util.HashMap"
+            resultType="kr.co.seoulit.account.posting.business.to.SlipBean">
+
+        SELECT
+        s.SLIP_NO as slipNo,
+        s.REPORTING_EMP_CODE as reportingEmpCode,
+        s.APPROVAL_EMP_CODE as approvalEmpCode,
+        s.EXPENSE_REPORT as expenseReport,
+        s.SLIP_TYPE as slipType,
+        s.SLIP_STATUS as slipStatus,
+        s.APPROVAL_DATE as approvalDate,
+        s.REPORTING_DATE as reportingDate,
+        s.DEPT_CODE as deptCode,
+        s.ACCOUNT_PERIOD_NO as accountPeriodNo
+        FROM slip s
+        WHERE s.REPORTING_DATE BETWEEN #{fromDate} AND #{toDate}
+        <if test='!slipStatus.equals("승인여부")'>
+            AND s.SLIP_STATUS = #{slipStatus}
+        </if>
+        ORDER BY s.REPORTING_DATE
+    </select>
+
+    <select id="selectDisApprovalSlipList" resultType="kr.co.seoulit.account.posting.business.to.SlipBean">
+			<![CDATA[
+        SELECT SLIP_NO              as slipNo,
+               ACCOUNT_PERIOD_NO    as accountPeriodNo,
+               DEPT_CODE            as deptCode,
+               SLIP_TYPE            as slipType,
+               EXPENSE_REPORT       as expenseReport,
+               REPORTING_EMP_CODE   as reportingEmpCode,
+               REPORTING_DATE       as reportingDate,
+               APPROVAL_EMP_CODE    as approvalEmpCode,
+               APPROVAL_DATE        as approvalDate,
+               SLIP_STATUS          as slipStatus
+        FROM SLIP
+        WHERE SLIP_STATUS = '승인요청'
+        ]]>
+		 </select>
+    <select id="selectSlipCount" parameterType="String" resultType="int">
+			<![CDATA[
+        SELECT COUNT(*)
+        FROM SLIP
+        WHERE SLIP_NO LIKE '%' || #{today} || '%'
+        ]]>
+		 </select>
+    <select id="selectSlip" parameterType="HashMap" resultType="kr.co.seoulit.account.posting.business.to.SlipBean">
+			<![CDATA[
+        SELECT SLIP_NO as slipNo
+            ACCOUNT_PERIOD_NO as accountPeriodNo
+            Approval_date as approvalDate
+            approval_emp_code as approvalEmpCode
+            Authorization_status as authorizationStatus
+            Dept_code as deptCode
+            Expense_report as expenseReport
+            Reporting_date as  reportingDate
+            Reporting_emp_code as reportingEmpCode
+            Slip_status as slipStatus
+            Slip_type as slipType
+        FROM SLIP
+        WHERE SLIP_NO = #{slipNo}
+        ]]>
+		 </select>
+    <!-- 받아오는 결과값을 받아서 셋팅해주는곳 -->
+    <resultMap id="accountingSettlementStatusResult"
+               type="kr.co.seoulit.account.posting.business.to.AccountingSettlementStatusBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO"/>
+        <result property="totalTrialBalance" column="TOTAL_TRIAL_BALANCE"/>
+        <result property="incomeStatement" column="INCOME_STATEMENT"/>
+        <result property="financialPosition" column="FINANCIAL_POSITION"/>
+    </resultMap>
+
+
+    <!-- 외부parameter로 값을 던져주는거 -->
+    <parameterMap id="accountingSettlementStatusParams" type="java.util.HashMap">
+        <parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN"/>
+        <parameter property="callResult" jdbcType="VARCHAR" javaType="String" mode="IN"/>
+        <parameter property="errorCode" jdbcType="DECIMAL" javaType="int" mode="OUT"/>
+        <parameter property="errorMsg" jdbcType="VARCHAR" javaType="String" mode="OUT"/>
+        <parameter property="ResultCursor" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"
+                   resultMap="accountingSettlementStatusResult"/>
+    </parameterMap>
+
+    <select id="selectAccountingSettlementStatus" parameterMap="accountingSettlementStatusParams"
+            statementType="CALLABLE">
+			<![CDATA[
+        {call P_ACCOUNTING_SETTLEMENT_STATUS(?, ?, ?, ?, ?)}
+        ]]>
+		 </select>
+
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="kr.co.seoulit.account.posting.ledger.mapper.GeneralLedgerMapper">
+
+	<select id="selectGeneralAccountLedgerList" parameterType="Map"
+		resultType="kr.co.seoulit.account.posting.ledger.to.GeneralLedgerBean">
+
+		SELECT S.REPORTING_DATE, --작성일자
+		A.ACCOUNT_NAME, --회계계정
+		J.LEFT_DEBTOR_PRICE, -- 차변금액
+		J.RIGHT_CREDITS_PRICE, --대변금액
+		(SELECT
+		C.CUSTOMER_NAME
+		FROM CUSTOMER C
+		WHERE C.CUSTOMER_CODE=J.CUSTOMER_CODE )
+		CUSTOMER_NAME, --거래처
+		s.EXPENSE_REPORT -- 적요
+		FROM SLIP S
+		, JOURNAL J
+		,
+		ACCOUNT A
+		WHERE S.SLIP_NO = J.SLIP_NO
+		<choose>
+			<when test="accountInnerCode==null">
+				AND A.ACCOUNT_INNER_CODE between #{fromCode} and
+				#{toCode}
+			</when>
+			<otherwise>AND A.ACCOUNT_INNER_CODE = #{accountInnerCode}</otherwise>
+		</choose>
+		AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+		AND S.REPORTING_DATE
+		BETWEEN #{fromDate} AND #{toDate}
+		AND S.SLIP_STATUS = '승인완료'
+		ORDER BY
+		S.REPORTING_DATE
+	</select>
+
+	<select id="selectAccountLedger"
+		resultType="kr.co.seoulit.account.posting.ledger.to.GeneralLedgerBean">
+        <![CDATA[
+        SELECT S.REPORTING_DATE, --작성일자
+               A.ACCOUNT_NAME, --회계계정
+               J.LEFT_DEBTOR_PRICE, -- 차변금액
+               J.RIGHT_CREDITS_PRICE, --대변금액
+               (SELECT C.CUSTOMER_NAME
+                FROM CUSTOMER C
+                WHERE C.CUSTOMER_CODE=J.CUSTOMER_CODE ) CUSTOMER_NAME, --거래처
+               s.EXPENSE_REPORT -- 적요
+        FROM SLIP S
+           , JOURNAL J
+           , ACCOUNT A
+        WHERE S.SLIP_NO = J.SLIP_NO
+          AND A.ACCOUNT_INNER_CODE = #{accountInnerCode}
+          AND S.REPORTING_DATE BETWEEN #{fromDate} AND #{toDate}
+          AND S.SLIP_STATUS = '승인완료'
+        ORDER BY S.REPORTING_DATE
+        ]]>
+	</select>
+</mapper>

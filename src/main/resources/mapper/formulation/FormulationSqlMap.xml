@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.seoulit.account.budget.formulation.mapper.FormulationMapper">
+
+
+	<select id="selectBudget" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean" resultMap="budgetBeanResult">
+		      <![CDATA[
+		SELECT M1_BUDGET,
+			   M2_BUDGET,
+			   M3_BUDGET,
+			   M4_BUDGET,
+			   M5_BUDGET,
+			   M6_BUDGET,
+			   M7_BUDGET,
+			   M8_BUDGET,
+			   M9_BUDGET,
+			   M10_BUDGET,
+			   M11_BUDGET,
+			   M12_BUDGET
+		FROM BUDGET
+		where DEPT_CODE= #{deptCode}
+		  and WORKPLACE_CODE= #{workplaceCode}
+		  and ACCOUNT_PERIOD_NO in (select to_number(#{accountPeriodNo})-1 from BUDGET)
+		  and ACCOUNT_INNER_CODE= #{accountInnerCode}
+		  and BUDGETING_CODE= 1
+		]]>
+    </select>
+    
+    <select id="selectBudgetorganization" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean" resultMap="budgetBeanResult">
+		      <![CDATA[
+		SELECT M1_BUDGET,
+			   M2_BUDGET,
+			   M3_BUDGET,
+			   M4_BUDGET,
+			   M5_BUDGET,
+			   M6_BUDGET,
+			   M7_BUDGET,
+			   M8_BUDGET,
+			   M9_BUDGET,
+			   M10_BUDGET,
+			   M11_BUDGET,
+			   M12_BUDGET
+		FROM BUDGET
+		where DEPT_CODE= #{deptCode}
+		  and WORKPLACE_CODE= #{workplaceCode}
+		  and ACCOUNT_PERIOD_NO = #{accountPeriodNo} 
+		  and ACCOUNT_INNER_CODE= #{accountInnerCode}
+		  and BUDGETING_CODE= 2
+		]]>
+    </select>
+
+
+	<select id="selectBudgetList" parameterType="Map" resultMap="budgetBeanResult">
+		<![CDATA[
+		SELECT *
+		FROM BUDGET
+		WHERE BUDGET_CODE=#{budgetCode}
+		  AND BUDGETING_CODE=#{budgetingCode}
+		]]>
+    </select>
+
+
+	<select id="selectBudgetCode"  resultType="kr.co.seoulit.account.budget.formulation.to.BudgetCodeBean">
+		<![CDATA[
+		SELECT *
+		FROM BUDGET_CODE
+		]]>
+    </select>
+
+	<insert id="batchBudgetCode" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean">
+    		<![CDATA[
+		INSERT INTO BUDGET
+		(
+			BUDGET_CODE,
+			DEPT_CODE,
+			BUDGETING_CODE,
+			WORKPLACE_CODE,
+			ACCOUNT_PERIOD_NO,
+			M1_BUDGET,
+			M2_BUDGET,
+			M3_BUDGET,
+			M4_BUDGET,
+			M5_BUDGET,
+			M6_BUDGET,
+			M7_BUDGET,
+			M8_BUDGET,
+			M9_BUDGET,
+			M10_BUDGET,
+			M11_BUDGET,
+			M12_BUDGET
+		)
+		VALUES
+			(
+				#{budgetCode},
+				#{deptCode},
+				#{budgetingCode},
+				#{workplaceCode},
+				#{accountPeriodNo},
+				#{m1Budget},
+				#{m2Budget},
+				#{m3Budget},
+				#{m4Budget},
+				#{m5Budget},
+				#{m6Budget},
+				#{m7Budget},
+				#{m8Budget},
+				#{m9Budget},
+				#{m10Budget},
+				#{m11Budget},
+				#{m12Budget}
+
+			)
+
+		]]>
+    </insert>
+
+	<insert id="insertBudget" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean">
+    		<![CDATA[
+		INSERT INTO BUDGET
+		(
+			DEPT_CODE,
+			WORKPLACE_CODE,
+			ACCOUNT_INNER_CODE,
+			ACCOUNT_PERIOD_NO,
+			BUDGETING_CODE,
+			M1_BUDGET,
+			M2_BUDGET,
+			M3_BUDGET,
+			M4_BUDGET,
+			M5_BUDGET,
+			M6_BUDGET,
+			M7_BUDGET,
+			M8_BUDGET,
+			M9_BUDGET,
+			M10_BUDGET,
+			M11_BUDGET,
+			M12_BUDGET
+		)
+		VALUES
+			(
+				#{deptCode},
+				#{workplaceCode},
+				#{accountInnerCode},
+				#{accountPeriodNo},
+				#{budgetingCode},
+				#{m1Budget},
+				#{m2Budget},
+				#{m3Budget},
+				#{m4Budget},
+				#{m5Budget},
+				#{m6Budget},
+				#{m7Budget},
+				#{m8Budget},
+				#{m9Budget},
+				#{m10Budget},
+				#{m11Budget},
+				#{m12Budget}
+
+			)
+
+		]]>
+    </insert>
+	<update id="updateBudget" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean">
+    		<![CDATA[
+		update BUDGET
+		set
+			M1_BUDGET = #{m1Budget},
+			M2_BUDGET = #{m2Budget},
+			M3_BUDGET = #{m3Budget},
+			M4_BUDGET = #{m4Budget},
+			M5_BUDGET = #{m5Budget},
+			M6_BUDGET = #{m6Budget},
+			M7_BUDGET = #{m7Budget},
+			M8_BUDGET = #{m8Budget},
+			M9_BUDGET = #{m9Budget},
+			M10_BUDGET = #{m10Budget},
+			M11_BUDGET = #{m11Budget},
+			M12_BUDGET = #{m12Budget}
+		WHERE
+			DEPT_CODE = #{deptCode} AND
+			WORKPLACE_CODE = #{workplaceCode} AND
+			ACCOUNT_INNER_CODE = #{accountInnerCode} AND
+			ACCOUNT_PERIOD_NO = #{accountPeriodNo} AND
+			BUDGETING_CODE = #{budgetingCode}
+		]]>
+    </update>
+
+
+	<insert id="formationBudget" parameterType="map">
+    		<![CDATA[
+		UPDATE BUDGET
+		SET
+			BUDGETING_CODE=#{budgetingCode}
+		WHERE BUDGET_CODE=#{budgetCode}
+
+		]]>
+    </insert>
+
+
+
+	<!-- 외부parameter로 값을 던져주는거 -->
+	<parameterMap id="budgetParams" type="kr.co.seoulit.account.budget.formulation.to.BudgetBean" >
+		<parameter property="deptCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="workplaceCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="accountInnerCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="budgetingCode" jdbcType="VARCHAR" javaType="String" mode="IN" />
+		<parameter property="m1Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m2Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m3Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m4Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m5Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m6Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m7Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m8Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m9Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m10Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m11Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+		<parameter property="m12Budget" jdbcType="DECIMAL" javaType="long" mode="IN" />
+	</parameterMap>
+
+	<!-- 	<select id="selectBudgetList" parameterMap="budgetParams" statementType="CALLABLE">
+            <![CDATA[
+                {call org_budget(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+            ]]>
+        </select> -->
+
+
+	<!-- 외부parameter로 값을 던져주는거 -->
+<!--	<parameterMap id="budgetStatusParams" type="java.util.HashMap" >   &lt;!&ndash;원래 풀네임 오류시, 수정  &ndash;&gt;-->
+<!--		<parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="workplaceCode" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="deptCode" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="RESULT" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"-->
+<!--				   resultMap="budgetStatusBeanResult" />-->
+<!--	</parameterMap>-->
+
+	<resultMap id="budgetStatusBeanResult" type="kr.co.seoulit.account.budget.formulation.to.BudgetStatusBean">
+
+	</resultMap>
+
+	<resultMap id="budgetBeanResult" type="kr.co.seoulit.account.budget.formulation.to.BudgetBean">
+		<result property="deptCode" column="DEPT_CODE"  />
+		<result property="workplaceCode" column="WORKPLACE_CODE"  />
+		<result property="budgetingCode" column="BUDGETING_CODE"  />
+		<result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO"  />
+		<result property="budgetingCode" column="BUDGETING_CODE"  />
+		<result property="m1Budget" column="M1_BUDGET"  />
+		<result property="m2Budget" column="M2_BUDGET" />
+		<result property="m3Budget" column="M3_BUDGET"  />
+		<result property="m4Budget" column="M4_BUDGET"  />
+		<result property="m5Budget" column="M5_BUDGET" />
+		<result property="m6Budget" column="M6_BUDGET"  />
+		<result property="m7Budget" column="M7_BUDGET"  />
+		<result property="m8Budget" column="M8_BUDGET"  />
+		<result property="m9Budget" column="M9_BUDGET"  />
+		<result property="m10Budget" column="M10_BUDGET"  />
+		<result property="m11Budget" column="M11_BUDGET"  />
+		<result property="m12Budget" column="M12_BUDGET" />
+	</resultMap>
+
+	<select id="selectBudgetStatus" statementType="CALLABLE" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean">
+		<![CDATA[
+		{call BUDGET_STATUS(
+		    #{accountPeriodNo},
+		    #{workplaceCode},
+		    #{deptCode},
+		    #{budgetStatus, jdbcType=CURSOR, javaType=java.sql.ResultSet, mode=OUT, resultMap=budgetStatusBeanResult})}
+		]]>
+	</select>
+
+
+	<select id="selectBudgetAppl" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean" resultMap="budgetBeanResult">
+		<![CDATA[
+		SELECT
+			M1_BUDGET,
+			M2_BUDGET,
+			M3_BUDGET,
+			M4_BUDGET,
+			M5_BUDGET,
+			M6_BUDGET,
+			M7_BUDGET,
+			M8_BUDGET,
+			M9_BUDGET,
+			M10_BUDGET,
+			M11_BUDGET,
+			M12_BUDGET
+
+		FROM BUDGET
+		where DEPT_CODE= #{deptCode}
+		  and WORKPLACE_CODE= #{workplaceCode}
+		  and ACCOUNT_INNER_CODE= #{accountInnerCode}
+		  and ACCOUNT_PERIOD_NO= #{accountPeriodNo}
+		  and BUDGETING_CODE= 1
+		]]>
+    </select>
+
+	<resultMap id="comparisonBudgetBeanResult" type="kr.co.seoulit.account.budget.formulation.to.ComparisonBudgetBean">
+		<result property="budgetDate" column="BUDGET_DATE"/>
+		<result property="appBudget" column="APP_BUDGET"/>
+		<result property="orgBudget" column="ORG_BUDGET"/>
+		<result property="execPerform" column="EXEC_PERFORM"/>
+		<result property="budgetAccountComparison" column="BUDGET_ACCOUNT_COMPARISON"/>
+	</resultMap>
+
+<!--	<parameterMap id="budgetComparisonParams" type="java.util.HashMap" >-->
+<!--		<parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="accountInnerCode" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="workplaceCode" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="deptCode" jdbcType="VARCHAR" javaType="String" mode="IN" />-->
+<!--		<parameter property="result" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"-->
+<!--				   resultMap="ComparisonBudgetBeanResult"/>-->
+<!--	</parameterMap>-->
+
+<!--	예산 대비실적-->
+	<select id="selectComparisonBudget" statementType="CALLABLE" >
+		<![CDATA[
+		{call BUDGET_COMPARISON(
+				#{accountPeriodNo, jdbcType=VARCHAR},
+		    	#{accountInnerCode, jdbcType=VARCHAR},
+				#{workplaceCode, jdbcType=VARCHAR},
+				#{deptCode, jdbcType=VARCHAR},
+				#{RESULT, jdbcType=CURSOR, javaType=java.sql.ResultSet, mode=OUT, resultMap=comparisonBudgetBeanResult})}
+		]]>
+	</select>
+	<select id="selectCurrentBudget" parameterType="kr.co.seoulit.account.budget.formulation.to.BudgetBean" resultMap="budgetBeanResult">
+		      <![CDATA[
+		SELECT M1_BUDGET,
+			   M2_BUDGET,
+			   M3_BUDGET,
+			   M4_BUDGET,
+			   M5_BUDGET,
+			   M6_BUDGET,
+			   M7_BUDGET,
+			   M8_BUDGET,
+			   M9_BUDGET,
+			   M10_BUDGET,
+			   M11_BUDGET,
+			   M12_BUDGET
+		FROM BUDGET
+		where DEPT_CODE= #{deptCode}
+		  and WORKPLACE_CODE= #{workplaceCode}
+		  and ACCOUNT_PERIOD_NO in (select to_number(#{accountPeriodNo}) from BUDGET)
+		  and ACCOUNT_INNER_CODE= #{accountInnerCode}
+		  and BUDGETING_CODE= 1
+		]]>
+    </select>
+
+
+</mapper>

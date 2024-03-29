@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace ="kr.co.seoulit.account.posting.ledger.mapper.AssistantLedgerMapper">
+    
+	<select id="selectAssetList" parameterType="String" resultType="kr.co.seoulit.account.posting.ledger.to.AssetBean">
+			<![CDATA[
+			 	SELECT rownum as assetNumber, 
+			 		   ASSET_NAME as assetName, 
+			 		   ASSET_CODE as assetCode
+			 	  FROM ASSET
+			 ]]>
+	</select>
+	<select id="selectAssetItemList" parameterType="String" resultType="kr.co.seoulit.account.posting.ledger.to.AssetItemBean">
+			<![CDATA[
+			 	SELECT ASSET_ITEM_CODE AS assetItemCode,
+			 		   ASSET_ITEM_NAME AS assetItemName,
+			 		   ACQUISITION_DATE AS acquisitionDate,
+			 		   ACQUISITION_AMOUNT AS acquisitionAmount,
+			 		   USEFUL_LIFE AS usefulLift, 
+			 		   MANAGEMENT_DEPT_NAME AS manageMentDeptName,
+			 		   PARENTS_CODE AS parentsCode,
+			 		   PARENTS_NAME AS parentsName
+			 	  FROM ASSET_ITEM WHERE PARENTS_CODE = #{parentsCode}
+			 ]]>
+	</select>
+	<select id="selectDeptList" parameterType="String" resultType="kr.co.seoulit.account.posting.ledger.to.DeptBean">
+			<![CDATA[
+			 	SELECT DEPT_CODE AS deptCode, 
+			 		   DEPT_NAME AS deptName 
+			      FROM DEPARTMENT
+			 ]]>
+	</select>
+	<insert id="createAssetItem" parameterType="kr.co.seoulit.account.posting.ledger.to.AssetItemBean">
+			<![CDATA[
+			 	INSERT INTO ASSET_ITEM
+			 	 VALUES(#{assetItemCode},
+			 	 		#{assetItemName},
+			 	 		#{acquisitionDate},
+			 	 		#{acquisitionAmount},
+			 	 		#{usefulLift},
+			 	 		#{manageMentDeptName},
+			 	 		#{parentsCode},
+			 	 		#{parentsName})
+			 ]]>
+	</insert>
+	<update id="updateAssetItem" parameterType="java.util.HashMap">
+			<![CDATA[
+			 	UPDATE    ASSET_ITEM 
+     			 		  SET ASSET_ITEM_CODE=#{assetItemCode}
+     					, ASSET_ITEM_NAME=#{assetItemName}
+     					, ACQUISITION_DATE=#{acquisitionDate}
+     					, ACQUISITION_AMOUNT=#{acquisitionAmount}
+     					, USEFUL_LIFE=#{usefulLift}
+     					, MANAGEMENT_DEPT_NAME=#{manageMentDeptName}
+     					, PARENTS_CODE=#{parentsCode}
+     					, PARENTS_NAME=#{parentsName}
+ 				 WHERE    ASSET_ITEM_CODE=#{previousAssetItemCode}
+
+			 ]]>
+	</update>
+	<delete id="removeAssetItem" parameterType="String">
+			<![CDATA[
+			 	DELETE FROM ASSET_ITEM WHERE ASSET_ITEM_CODE=#{assetItemCode}
+			 ]]>
+	</delete>
+
+</mapper>

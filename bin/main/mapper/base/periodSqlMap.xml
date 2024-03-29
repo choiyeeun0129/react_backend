@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+	<mapper namespace="kr.co.seoulit.account.sys.base.mapper.PeriodMapper">
+	
+		
+
+		<parameterMap id="periodParams" type="java.util.Map">
+			<parameter property="periodNo" jdbcType="VARCHAR" javaType="String" mode="IN"/>
+			<parameter property="ERROR_CODE" jdbcType="DECIMAL" javaType="int" mode="OUT"/>
+	        <parameter property="ERROR_MSG" jdbcType="VARCHAR" javaType="String" mode="OUT"/>
+		</parameterMap>
+		
+		
+		<!-- setEarlyStatements -->
+		<select id="updateEarlyStatements" parameterMap="periodParams">
+		    <![CDATA[
+		        {call P_COMPUTE_EARLY_STATEMENTS(?, ?, ?)}
+		    ]]>
+    	</select>
+    	
+    	<!-- getPeriodNo #today#는 ?가 아닌데??-->
+    	<select id="getPeriodNo" parameterType="String" resultType="String">
+    		<![CDATA[
+				SELECT  ACCOUNT_PERIOD_NO 
+				FROM    PERIOD 
+				WHERE   #{today}
+				BETWEEN PERIOD_START_DATE AND PERIOD_END_DATE
+			]]>
+    	</select>
+    	
+    	
+    	<!-- insertPeriodNo -->
+    	<insert id="insertPeriodNo" parameterType="java.util.HashMap">
+    		<![CDATA[
+				INSERT INTO PERIOD 
+				VALUES(
+					  (SELECT COUNT(*)+1 FROM PERIOD)
+					, 'BRC-01'
+					, #{sdate}
+					, #{edate}
+					)
+			]]>
+    	</insert>
+	</mapper>

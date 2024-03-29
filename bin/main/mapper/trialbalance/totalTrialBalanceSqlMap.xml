@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="kr.co.seoulit.account.settlement.trialbalance.mapper.TotalTrialBalanceMapper">
+
+
+	<resultMap id="totalTrialBalanceResult"
+		type="kr.co.seoulit.account.settlement.trialbalance.to.TotalTrialBalanceBean">
+
+		<result property="lev" column="LEV" />
+		<result property="accountName" column="ACCOUNT_NAME" />
+		<result property="accountInnerCode" column="CODE" />
+		<result property="debitsSumBalance" column="DEBITS_SUM_BALANCE" />
+		<result property="debitsSum" column="DEBITS_SUM" />
+		<result property="creditsSum" column="CREDITS_SUM" />
+		<result property="creditsSumBalance"
+			column="CREDITS_SUM_BALANCE" />
+	</resultMap>
+
+	<resultMap id="accountingSettlementStatusResult"
+		type="kr.co.seoulit.account.posting.business.to.AccountingSettlementStatusBean">
+		<result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO" />
+		<result property="totalTrialBalance"
+			column="TOTAL_TRIAL_BALANCE" />
+		<result property="incomeStatement" column="INCOME_STATEMENT" />
+		<result property="financialPosition"
+			column="FINANCIAL_POSITION" />
+	</resultMap>
+
+	<parameterMap id="totalTrialBalanceParams"
+		type="java.util.HashMap">
+		<parameter property="accountPeriodNo" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="callResult" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="errorCode" jdbcType="DECIMAL"
+			javaType="long" mode="OUT" />
+		<parameter property="errorMsg" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="OUT" />
+		<parameter property="totalTrialBalance" jdbcType="CURSOR"
+			javaType="java.sql.ResultSet" mode="OUT"
+			resultMap="totalTrialBalanceResult" />
+		<parameter property="accountingSettlementStatus"
+			jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"
+			resultMap="accountingSettlementStatusResult" />
+	</parameterMap>
+
+	<select id="selectcallTotalTrialBalance"
+		parameterMap="totalTrialBalanceParams" statementType="CALLABLE">
+			<![CDATA[
+         {call P_TOTAL_TRIAL_BALANCE(? ,? ,? ,? ,?, ?)}
+       ]]>
+	</select>
+
+
+	<parameterMap id="earlyStatementsParams"
+		type="java.util.HashMap">
+		<parameter property="accountPeriodNo" jdbcType="VARCHAR"
+			javaType="String" mode="IN" />
+		<parameter property="callResult" jdbcType="VARCHAR"
+			javaType="String" mode="IN" />
+		<parameter property="errorCode" jdbcType="DECIMAL"
+			javaType="long" mode="OUT" />
+		<parameter property="errorMsg" jdbcType="VARCHAR"
+			javaType="String" mode="OUT" />
+		<parameter property="accountingSettlementStatus"
+			jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"
+			resultMap="accountingSettlementStatusResult" />
+	</parameterMap>
+	<select id="selectcallEarlyStatements"
+		parameterMap="earlyStatementsParams"
+		resultMap="accountingSettlementStatusResult" statementType="CALLABLE"> <![CDATA[ 
+		{call P_EARLY_STATEMENTS(?, ?, ?, ?, ?)} ]]>
+	</select>
+
+	<select id="selectAccountingSettlement"
+		parameterMap="earlyStatementsParams" statementType="CALLABLE">
+		<![CDATA[
+         {call P_ACCOUNTING_SETTLEMENT_STATUS(?, ?, ?, ?, ?)}
+       ]]>
+	</select>
+
+	<select id="selectDetailTrialBalance"
+		parameterType="java.util.HashMap"
+		resultType="kr.co.seoulit.account.settlement.trialbalance.to.DetailTrialBalanceBean">
+
+		<![CDATA[
+				SELECT
+					nvl(LEV, 0) AS lev, 
+					CODE AS accountInnerCode, 
+					nvl(DEBITS_SUM, 0) AS debitsSum, 
+					nvl(EXCEPT_CASH_DEBITS, 0) AS exceptCashDebits, 
+					nvl(CASH_DEBITS, 0) AS cashDebits, 
+					LPAD(' ', ( LEV - 1 ) * 4) || NVL(A1.ACCOUNT_NAME, '합계') AS accountName, 
+					nvl(CASH_CREDITS, 0) AS cashCredits, 
+					nvl(EXCEPT_CASH_CREDITS, 0) AS exceptCashCredits, 
+					nvl(CREDITS_SUM, 0) AS creditsSum
+				FROM
+					ACCOUNT A1, 
+					(
+					SELECT
+						CASE
+							WHEN ACCOUNT_CODE IS NOT NULL THEN 3
+							WHEN APPEND_CODE IS NOT NULL THEN 2
+							WHEN PARENT_CODE IS NOT NULL THEN 1
+						END AS LEV,
+						CASE
+							WHEN ACCOUNT_CODE IS NOT NULL THEN ACCOUNT_CODE
+							WHEN APPEND_CODE IS NOT NULL THEN APPEND_CODE
+							WHEN PARENT_CODE IS NOT NULL THEN PARENT_CODE
+						END AS CODE,
+						PARENT_CODE,
+						APPEND_CODE,
+						ACCOUNT_CODE,
+						SUM(DEBITS_SUM) AS DEBITS_SUM,
+						SUM(EXCEPT_CASH_DEBITS) AS EXCEPT_CASH_DEBITS,
+						SUM(CASH_DEBITS) AS CASH_DEBITS,
+						SUM(CASH_CREDITS) AS CASH_CREDITS,
+						SUM(EXCEPT_CASH_CREDITS) AS EXCEPT_CASH_CREDITS,
+						SUM(CREDITS_SUM) AS CREDITS_SUM
+					FROM
+						(
+						SELECT
+							A1.ACCOUNT_INNER_CODE AS PARENT_CODE,
+							A2.ACCOUNT_INNER_CODE AS APPEND_CODE,
+							A3.ACCOUNT_CODE AS ACCOUNT_CODE,
+							J1.DEBITS AS DEBITS_SUM,
+						CASE
+								WHEN J1.DEBITS = 0
+							THEN 0
+								ELSE J1.DEBITS - J2.CASH_DEBITS
+							END AS EXCEPT_CASH_DEBITS,
+						CASE
+								WHEN J1.DEBITS = 0 
+							THEN 0
+								ELSE J2.CASH_DEBITS
+							END AS CASH_DEBITS,
+						CASE
+								WHEN J1.CREDITS = 0 
+							THEN 0
+								ELSE J2.CASH_CREDITS
+							END AS CASH_CREDITS,
+						CASE
+								WHEN J1.CREDITS = 0 
+							THEN 0
+								ELSE J1.CREDITS - J2.CASH_CREDITS
+							END AS EXCEPT_CASH_CREDITS, 
+							J1.CREDITS AS CREDITS_SUM
+						FROM
+							ACCOUNT A1,
+							ACCOUNT A2,
+							ACCOUNT A3,
+							(
+							SELECT
+								J.SLIP_NO AS SLIP_NO,
+								J.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+								J.LEFT_DEBTOR_PRICE AS DEBITS,
+								J.RIGHT_CREDITS_PRICE AS CREDITS
+							FROM
+								JOURNAL J,
+								ACCOUNT A,
+								SLIP S
+							WHERE
+								J.SLIP_NO = S.SLIP_NO
+								AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+								AND S.SLIP_STATUS = '승인완료'
+								AND S.REPORTING_DATE BETWEEN '${fromDate}' AND '${toDate}'
+							) J1,
+							(
+							SELECT
+								SLIP_NO,
+								LEFT_DEBTOR_PRICE AS CASH_DEBITS,
+								RIGHT_CREDITS_PRICE AS CASH_CREDITS
+							FROM
+								JOURNAL
+							WHERE
+								ACCOUNT_INNER_CODE = '0101') J2
+						WHERE
+							J1.SLIP_NO = J2.SLIP_NO
+							AND J1.ACCOUNT_CODE = A3.ACCOUNT_INNER_CODE
+							AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+							AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+))
+					GROUP BY
+						ROLLUP ( PARENT_CODE,
+						APPEND_CODE,
+						ACCOUNT_CODE )
+					) A2
+				WHERE
+					A1.ACCOUNT_INNER_CODE(+) = A2.CODE
+				ORDER BY
+						SUBSTR(CODE, 1, 4),
+						SUBSTR(CODE, 6) DESC NULLS LAST
+      ]]>
+
+
+	</select>
+
+
+
+	<!-- <parameterMap id="earlyStatementsParams" type="java.util.HashMap"> 
+		<parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" 
+		mode="IN" /> <parameter property="callResult" jdbcType="VARCHAR" javaType="String" 
+		mode="IN" /> <parameter property="errorCode" jdbcType="DECIMAL" javaType="long" 
+		mode="OUT" /> <parameter property="errorMsg" jdbcType="VARCHAR" javaType="String" 
+		mode="OUT" /> <parameter property="accountingSettlementStatus" jdbcType="CURSOR" 
+		javaType="java.sql.ResultSet" mode="OUT" resultMap="accountingSettlementStatusResult" 
+		/> </parameterMap> <select id="selectcallEarlyStatements" parameterMap="earlyStatementsParams" 
+		resultMap="accountingSettlementStatusResult" statementType="CALLABLE"> <![CDATA[ 
+		{call P_TMP_EARLY_STATEMENTS(?)} ]]> </select> -->
+
+
+	<select id="selectTotalTrialBalance"
+		parameterType="java.util.HashMap"
+		resultType="kr.co.seoulit.account.settlement.trialbalance.to.TotalTrialBalanceBean">
+	<![CDATA[
+			SELECT 
+				LEV,
+				CODE,
+				DEBITS_SUM_BALANCE,
+				DEBITS_SUM,
+				ACCOUNT_NAME,
+				CREDITS_SUM,
+				CREDITS_SUM_BALANCE
+			FROM (
+				-- 분류 및 계정 이름 붙여주기
+				SELECT 
+					LEV,						-- 레벨링
+					CODE,						-- 계정과목 코드
+					DEBITS_SUM_BALANCE,			-- 차변 잔액 합계
+					DEBITS_SUM,					-- 차변 합계
+				--	DECODE(LEV,'1','--') || A1.ACCOUNT_NAME || DECODE(LEV,'1','--')
+				--		AS ACCOUNT_NAME,
+				--	DECODE(CONTRA_ACCOUNT, 'Y','ㄴ') || A1.ACCOUNT_NAME
+				--		AS ACCOUNT_NAME, 		-- 중간에 이름 넣기  
+					CASE WHEN LEV = '1' THEN '<' || A1.ACCOUNT_NAME || '>'
+						WHEN LEV='2' THEN '-' || A1.ACCOUNT_NAME || '-'
+						WHEN LEV='3' AND  CONTRA_ACCOUNT='Y' THEN 'ㄴ' || A1.ACCOUNT_NAME
+						WHEN LEV='3' THEN A1.ACCOUNT_NAME
+					END AS ACCOUNT_NAME,
+					CREDITS_SUM,				-- 대변 합계
+					CREDITS_SUM_BALANCE			-- 대변 잔액 합계
+				FROM ACCOUNT A1,
+					(	
+					-- 중분류, 대분류별로 차,대변 합계, 차/대변 잔액 합계를 롤업으로 계산 해준다.
+					SELECT 
+						CASE WHEN ACCOUNT_CODE IS NOT NULL THEN 3
+							WHEN DETAIL_APPEND_CODE IS NOT NULL THEN 2
+							WHEN APPEND_CODE IS NOT NULL THEN 1
+						END AS LEV, 											-- 레벨링 작업을 해준다. 
+						CASE WHEN ACCOUNT_CODE IS NOT NULL THEN ACCOUNT_CODE
+							WHEN DETAIL_APPEND_CODE IS NOT NULL THEN DETAIL_APPEND_CODE
+							WHEN APPEND_CODE IS NOT NULL THEN APPEND_CODE
+						END AS CODE, 											-- 조인코드로, 값이 있는 것부터 코드를 지정, 레벨별로 계정코드 할당	
+						APPEND_CODE,											-- 참조코드
+						DETAIL_APPEND_CODE,										-- 상세참조코드
+						ACCOUNT_CODE,											-- 계정코드
+						DECODE(SIGN(SUM(DEBITS)-SUM(CREDITS)),1,SUM(DEBITS)-SUM(CREDITS),0)
+							AS DEBITS_SUM_BALANCE,								-- 차변잔액 합계/SIGN함수로 양수 값을 지정
+						SUM(DEBITS) AS DEBITS_SUM,								-- 차변 합계
+						SUM(CREDITS) AS CREDITS_SUM,							-- 대변 합계
+						DECODE(SIGN(SUM(CREDITS)-SUM(DEBITS)), 1, SUM(CREDITS)-SUM(DEBITS), 0)
+							AS CREDITS_SUM_BALANCE,										-- 대변 잔액 합계
+						CASE WHEN ACCOUNT_CODE IS NOT NULL
+							AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y' ELSE 'N'
+						END AS CONTRA_ACCOUNT									-- 차감 금액 확인
+					FROM(
+						SELECT 
+							APPEND_CODE,					-- 참조코드
+							DETAIL_APPEND_CODE,				-- 상세참조코드
+							ACCOUNT_CODE,					-- 계정코드
+							DEBITS,							-- 차변금액
+							CREDITS,						-- 대변금액
+							ACCOUNT_CHARACTER				-- 구분
+						FROM(
+							SELECT
+								A1.PARENT_ACCOUNT_INNER_CODE 	AS PARENT_CODE, -- 상위계정 내부코드(대분류)
+								A1.ACCOUNT_INNER_CODE 			AS APPEND_CODE, -- 계정내부코드(중분류)
+								A2.ACCOUNT_INNER_CODE 			AS DETAIL_APPEND_CODE, --계정내부코드(상세분류)
+								A3.ACCOUNT_INNER_CODE 			AS ACCOUNT_CODE, --계정내부코드(상세코드)
+								A3.ACCOUNT_CHARACTER 			AS ACCOUNT_CHARACTER, --계정그룹명(그룹계정뷴류)
+								A3.ACCOUNT_NAME 				AS ACCOUNT_NAME, --계정명(상세계정명)
+								J.LEFT_DEBTOR_PRICE				AS DEBITS, --차변금액
+								J.RIGHT_CREDITS_PRICE 			AS CREDITS --대변금액
+							FROM
+								SLIP S,
+								JOURNAL J,
+								ACCOUNT A1,
+								ACCOUNT A2,
+								ACCOUNT A3
+							WHERE S.ACCOUNT_PERIOD_NO = '${accountPeriodNo}'
+								AND J.SLIP_NO = S.SLIP_NO 
+								AND S.SLIP_STATUS = '승인완료' -- 승인완료 인것만 계산 
+								AND J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE--분개에 적힌 계정과목을 불러온다. 
+								AND A3.PARENT_ACCOUNT_INNER_CODE= A2.ACCOUNT_INNER_CODE (+) -- 상세코드와 상세분류 매칭
+								AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE (+) -- 상세분류와 중간분류 매칭
+						)
+						--롤업해주기 전 분류 
+					)
+					GROUP BY ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+				) A2
+				WHERE A1.ACCOUNT_INNER_CODE (+) = A2.CODE
+				AND LEV IS NOT NULL
+			)
+			WHERE DEBITS_SUM > 0 OR CREDITS_SUM>0
+				
+			ORDER BY
+				SUBSTR(CODE, 1, 4),SUBSTR(CODE, 6) DESC NULLS LAST
+	 ]]>
+	</select>
+
+
+</mapper>
+		 

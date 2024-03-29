@@ -1,0 +1,116 @@
+
+plugins {
+	id 'org.springframework.boot' version '2.7.0'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'war'
+	id 'java-library'
+}
+
+bootWar{
+	archiveFileName = "Root.war"
+}
+
+configurations.all {
+   exclude module: 'slf4j-log4j12'
+    exclude module: 'jms'
+    exclude module: 'jmxtools'
+    exclude module: 'jmxri'
+    }
+    
+repositories {
+   mavenCentral()
+}
+
+dependencies {
+
+
+    implementation 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'javax.faces:jsf-api:1.2_12'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'javax.activation:activation:1.1'
+    implementation 'javax.servlet:jstl:1.2'
+    implementation "org.apache.tomcat.embed:tomcat-embed-jasper"
+    implementation 'commons-fileupload:commons-fileupload:1.2'
+    implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'org.slf4j:slf4j-api:1.6.6'
+    runtimeOnly 'org.slf4j:jcl-over-slf4j:1.6.6'
+    runtimeOnly 'org.slf4j:slf4j-log4j12:1.6.6'
+
+    /* 스프링의 jsp 사용+jsonObject +slf4j */
+    implementation 'org.sitemesh:sitemesh:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.0'
+    implementation('org.slf4j:jcl-over-slf4j')
+    implementation("org.slf4j:slf4j-api:1.7.7")
+    /*JDBC 연동을 위한 STARTER 를제공*/
+
+    /*사이트메쉬+mybati+@Mapper설정*/
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.apache.commons:commons-email:1.2'
+    implementation 'org.apache.poi:poi:3.16'
+    implementation 'org.apache.poi:poi-ooxml:3.16'
+    /*Gson+mail+excel*/
+
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.11.4'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.4'
+    implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.4'
+
+
+    implementation group: 'net.sf.jasperreports', name: 'jasperreports', version: '5.5.1'
+    implementation 'org.springframework:spring-web:5.3.16'
+    implementation group: 'tomcat', name: 'jasper-compiler', version: '5.5.23'
+    implementation 'net.sf.jasperreports:jasperreports-fonts:4.0.0'
+
+    /*jasper 아이리포트1*/
+
+    implementation group: 'org.bgee.log4jdbc-log4j2', name: 'log4jdbc-log4j2-jdbc4.1', version: '1.16'
+    /* 로깅 설정*/
+
+    implementation files('src/main/resources/libs/jsp-api.jar')
+    implementation files('src/main/resources/libs/commons-lang-2.6.jar')
+    implementation files('src/main/resources/libs/ojdbc6.jar')
+    /*jdbc 라이선스문제로 주입의 한계 -> 경로에 jar를 넣어줘야함(choi)*/
+
+
+    //implementation 'org.codehaus.groovy:groovy-all:2.4.3'
+    // https://mvnrepository.com/artifact/com.lowagie/itext
+    implementation group: 'com.lowagie', name: 'itext', version: '2.1.7'
+    implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'
+    implementation group: 'org.apache.commons', name: 'commons-imaging', version: '1.0-alpha1'
+    /* 아이리포트 2*/
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: '2.7.0'
+
+    //smtp outlook 메일
+    // https://mvnrepository.com/artifact/javax.activation/activation
+    implementation group: 'javax.activation', name: 'activation', version: '1.1.1'
+
+    //logback sms appender
+    implementation 'tw.com.mitake:logback-sms-appender:0.3.0'
+    // sms appender에 필요한 json-lib
+    implementation group: 'org.json', name: 'json', version: '20220320'
+
+    // 자바에서 파일 처리를 가능하게 해줌
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
+
+    //jpa 사용 하기위해 선언
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+}
+
+tasks.named('test') {
+   useJUnitPlatform()
+}

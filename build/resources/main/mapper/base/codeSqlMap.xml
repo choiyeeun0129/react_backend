@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+	<mapper namespace="kr.co.seoulit.account.sys.base.mapper.DetailCodeMapper">
+	<!-- findDetailCodeList -->
+	<select id="selectDetailCodeList" parameterType="java.util.HashMap"
+		resultType="kr.co.seoulit.account.sys.base.to.DetailCodeBean" >
+		    <![CDATA[
+		        SELECT DIVISION_CODE_NO as divisionCodeNo,
+		        	DETAIL_CODE	as detailCode,
+		        	DETAIL_CODE_NAME AS description
+		        FROM CODE_DETAIL
+		        WHERE DIVISION_CODE_NO = #{divisionCodeNo}
+		    ]]>
+    	</select>
+		</mapper>

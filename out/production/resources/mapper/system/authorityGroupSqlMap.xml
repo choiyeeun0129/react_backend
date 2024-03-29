@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+	<mapper namespace="kr.co.seoulit.account.operate.system.mapper.AuthorityGroupMapper">
+				 
+		<!-- selectAuthorityEmp -->
+		<select id="selectAuthorityGroup" parameterType="String" resultType="kr.co.seoulit.account.operate.system.to.AuthorityEmpBean">
+			<![CDATA[
+				SELECT MANAGER as menuCode, 
+				AUTHORITY_GROUP_CODE as menuName
+				FROM(SELECT DISTINCT MANAGER, AUTHORITY_GROUP_CODE
+				 FROM AUTHORITY_GROUP)
+				 ORDER by MANAGER
+    		]]>
+		</select>
+		
+		<select id="selectAuthorityMenu" parameterType="String" resultType="kr.co.seoulit.account.operate.system.to.AuthorityMenuBean">
+			<![CDATA[
+				SELECT  DISTINCT
+				m.menu_code as menuCode ,
+				m.MENU_NAME menuName, 
+				mu.AUTHORITY as authority, 
+				mu.AUTHORITY_GROUP_CODE as deptCode,
+				M.URL as url 
+				FROM MENU m,
+				(SELECT MENU_CODE, AUTHORITY, AUTHORITY_GROUP_CODE FROM MENU_USE_POSITION
+				WHERE AUTHORITY_GROUP_CODE = #{menuName} ORDER BY MENU_CODE) mu
+				WHERE mu.MENU_CODE = m.MENU_CODE
+				ORDER BY MENUCODE
+    		]]>
+		</select>
+		 
+		 <!-- updateAuthority -->
+		 <update id="updateAuthorityMenu" parameterType="kr.co.seoulit.account.operate.system.to.AuthorityMenuBean">
+		 	<![CDATA[
+		 		UPDATE MENU_USE_POSITION SET 
+		 		AUTHORITY=#{authority}
+		 		WHERE MENU_CODE=#{menuCode}
+		 		AND AUTHORITY_GROUP_CODE=#{deptCode}
+		 	]]>
+		 </update>
+				 
+		<!-- selectAuthorityEmp -->
+		<select id="selectAuthorityEmp" parameterType="String" resultType="kr.co.seoulit.account.operate.system.to.AuthorityEmpBean">
+			<![CDATA[
+				SELECT MANAGER as menuCode, 
+				AUTHORITY_GROUP_CODE as menuName, 
+				DEPT_CODE as deptCode, 
+				AUTHORITY_GROUP as authorityGroup
+				FROM AUTHORITY_GROUP 
+				WHERE DEPT_CODE= #{deptCode}
+				ORDER BY MANAGER
+    		]]>
+		</select>
+		<select id="selectAuthorityGroupCode" parameterType="String" >
+			<![CDATA[
+				SELECT * FROM
+			(SELECT * FROM AUTHORITY_GROUP
+			ORDER BY AUTHORITY_GROUP_CODE DESC)
+			WHERE ROWNUM = 1
+    		]]>
+		</select>
+		 
+		 <!-- updateAuthority -->
+		 <update id="updateAuthorityGroup" parameterType="kr.co.seoulit.account.operate.system.to.AuthorityEmpBean">
+		 	<![CDATA[
+		 		UPDATE AUTHORITY_GROUP SET AUTHORITY_GROUP= #{authorityGroup}
+		 		WHERE DEPT_CODE=#{deptCode}
+		 		AND MANAGER=#{menuCode}
+		 		AND AUTHORITY_GROUP_CODE=#{menuName}
+		 	]]>
+		 </update>
+		 
+		 <delete id="deleteAuthorityGroup" parameterType="String">
+		 	<![CDATA[
+		 		DELETE FROM AUTHORITY_GROUP
+		 		WHERE AUTHORITY_GROUP_CODE= #{groupCode}
+		 	]]>
+		 </delete>
+		 
+		  <delete id="deleteAuthorityMenu" parameterType="String">
+		 	<![CDATA[
+		 	DELETE FROM MENU_USE_POSITION
+		 	WHERE AUTHORITY_GROUP_CODE= #{groupCode}
+		 	]]>
+		 </delete>
+		 
+		   <insert id="insertAuthorityGroup" parameterType="Map">
+		 	<![CDATA[
+		 	INSERT all
+		 	INTO AUTHORITY_GROUP VALUES(#{nextGroupCode},#{addAuthority},'DPT-01','0')
+		 	INTO AUTHORITY_GROUP VALUES(#{nextGroupCode},#{addAuthority},'DPT-02','0')
+		 	INTO AUTHORITY_GROUP VALUES(#{nextGroupCode},#{addAuthority},'DPT-07','0')
+		 	INTO MENU_USE_POSITION VALUES('AU01',#{nextGroupCode},'ME001','0')
+		 	INTO MENU_USE_POSITION VALUES('AU02',#{nextGroupCode},'ME002','0')
+		 	INTO MENU_USE_POSITION VALUES('AU03',#{nextGroupCode},'ME003','0')
+		 	INTO MENU_USE_POSITION VALUES('AU04',#{nextGroupCode},'ME004','0')
+		 	INTO MENU_USE_POSITION VALUES('AU05',#{nextGroupCode},'ME005','0')
+		 	INTO MENU_USE_POSITION VALUES('AU06',#{nextGroupCode},'ME006','0')
+		 	INTO MENU_USE_POSITION VALUES('AU07',#{nextGroupCode},'ME007','0')
+		 	select * from dual
+		 	]]>
+		 </insert>
+		 
+	</mapper>

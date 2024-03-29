@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.account.settlement.financialstatements.mapper.CapitalStatementMapper">
+
+
+    <resultMap id="capitalStatementResult" type="kr.co.seoulit.account.settlement.financialstatements.to.CapitalStatementBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO" />
+        <result property="accountCode" column="ACCOUNT_CODE"/>
+        <result property="accountName" column="ACCOUNT_NAME"/>
+        <result property="capitalStock" column="CAPITAL_STOCK"/>
+        <result property="capitalSurplus" column="CAPITAL_SURPLUS"/>
+        <result property="retainedEarnings" column="RETAINED_EARNINGS" />
+        <result property="etcCapital" column="ETC_CAPITAL"  />
+        <result property="otherAccumulative" column="OTHER_ACCUMULATIVE"   />
+        <result property="totalStockholdersEquity" column="TOTAL_STOCKHOLDERS_EQUITY"  />
+    </resultMap>
+
+    <resultMap id="accountingSettlementStatusBeanResult" type="kr.co.seoulit.account.posting.business.to.AccountingSettlementStatusBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO" />
+        <result property="totalTrialBalance" column="TOTAL_TRIAL_BALANCE"/>
+        <result property="incomeStatement" column="INCOME_STATEMENT"/>
+        <result property="financialPosition" column="FINANCIAL_POSITION"/>
+        <result property="capitalStatement" column="CAPITAL_STATEMENT"/>
+    </resultMap>
+
+    <parameterMap id="capitalStatementParams" type="java.util.HashMap">
+        <parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="String" mode="IN" />
+        <parameter property="callResult" jdbcType="VARCHAR" javaType="String" mode="IN" />
+        <parameter property="errorCode" jdbcType="DECIMAL" javaType="int" mode="OUT" />
+        <parameter property="errorMsg" jdbcType="VARCHAR" javaType="String" mode="OUT" />
+        <parameter property="capitalStatement" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"
+                   resultMap="capitalStatementResult"/>
+        <parameter property="accountingSettlementStatus" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"
+                   resultMap="accountingSettlementStatusBeanResult"/>
+
+    </parameterMap>
+    <!-- 프로시저호출 -->
+    <select id="selectcallCapitalStatement" parameterMap="capitalStatementParams"  statementType="CALLABLE"  >
+      <![CDATA[
+        {call P_CAPITAL_STATEMENT(?, ?, ?, ?, ?, ?)}
+        ]]>
+   </select>
+
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.seoulit.account.posting.ledger.mapper.JournalEntryMapper">
+	
+	<select id="selectRangedJournalList" parameterType="java.util.HashMap" resultMap="kr.co.seoulit.account.posting.ledger.mapper.JournalEntryMapper.journalResult">
+		<![CDATA[
+        SELECT J.JOURNAL_NO          as journalNo,
+               J.SLIP_NO             as slipNo,
+               J.BALANCE_DIVISION    as balanceDivision,
+               J.ACCOUNT_INNER_CODE  as accountCode,
+               A.ACCOUNT_NAME        as accountName,
+               J.CUSTOMER_CODE       as customerCode,
+               J.LEFT_DEBTOR_PRICE   as leftDebtorPrice,
+               J.RIGHT_CREDITS_PRICE as rightCreditsPrice
+              
+        FROM SLIP S,
+             JOURNAL J,
+             ACCOUNT A
+        WHERE J.SLIP_NO = S.SLIP_NO
+          AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+          AND S.REPORTING_DATE BETWEEN #{fromDate} AND #{toDate} 
+          AND S.SLIP_STATUS = '승인완료'
+       ORDER BY S.REPORTING_DATE, S.SLIP_NO, J.JOURNAL_NO
+        ]]>
+      </select>
+      
+	  <select id="selectJournalDetailList" parameterType="String" resultMap="kr.co.seoulit.account.posting.ledger.mapper.JournalEntryMapper.journalDetailResult">
+		<![CDATA[
+					select 
+            		J.JOURNAL_NO as journalNo, 
+            		J.JOURNAL_DETAIL_NO as journalDetailNo, 
+            		J.DESCRIPTION AS journalDescription, 
+            		A.ACCOUNT_CONTROL_TYPE as accountControlType, 
+            		A.ACCOUNT_CONTROL_NAME as accountControlName, 
+            		A.ACCOUNT_CONTROL_CODE as accountControlCode, 
+            		A.DESCRIPTION AS accountControlDescription
+            		from journal_detail J, 
+            		account_control_detail A 
+            		where 
+            		J.account_control_code=A.account_control_code 
+            		and J.journal_no= #{journalNo}
+		
+		 ]]>
+		 </select>
+		 
+	<resultMap id="journalResult" type="kr.co.seoulit.account.posting.business.to.JournalBean">
+		<result property="journalNo" column="journalNo" />
+		<result property="slipNo" column="slipNo" />
+		<result property="balanceDivision" column="balanceDivision" />
+		<result property="accountCode" column="accountCode" />
+		<result property="accountName" column="accountName" />
+		<result property="customerCode" column="customerCode" />
+		<result property="leftDebtorPrice" column="leftDebtorPrice" />
+		<result property="rightCreditsPrice" column="rightCreditsPrice" />
+		<collection property="journalDetailList" resultMap="kr.co.seoulit.account.posting.ledger.mapper.JournalEntryMapper.journalDetailResult"
+				javaType="java.util.ArrayList" />
+	</resultMap>
+	
+	<resultMap id="journalDetailResult" type="kr.co.seoulit.account.posting.business.to.JournalDetailBean">
+		<result property="journalNo" column="journalNo" />
+		<result property="journalDetailNo" column="journalDetailNo" />
+		<result property="journalDescription" column="journalDescription" />
+		<result property="accountControlType" column="accountControlType" />
+		<result property="accountControlName" column="accountControlName" />
+		<result property="accountControlCode" column="accountControlCode" />
+		<result property="accountControlDescription" column="accountControlDescription" />
+	</resultMap>
+</mapper>
